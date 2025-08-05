@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vishwakarma Furniture</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7;
+      color: #333;
+    }
+    header {
+      background: linear-gradient(to right, #8e44ad, #3498db);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 { margin: 0; font-size: 2rem; }
+    header p { margin: 5px 0; }
+    #search {
+      margin-top: 1rem;
+      padding: 10px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 5px;
+      border: none;
+      font-size: 1rem;
+    }
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      padding: 1.5rem;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    .card:hover { transform: scale(1.02); }
+    .card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .content {
+      padding: 1rem;
+    }
+    .content h3 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
+    .content p { margin: 5px 0; color: #555; }
+    .btn {
+      background: #8e44ad;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #cart-section, #contact-section, #admin-section {
+      padding: 1rem;
+      background: #fff;
+      margin: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    footer {
+      background: #222;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+    input, textarea {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    @media (max-width: 500px) {
+      header h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body><header>
+  <h1>Vishwakarma Furniture</h1>
+  <p>Luxury Living Redefined</p>
+  <p><strong>Owner:</strong> Amit Vishwakarma</p>
+  <p><strong>Address:</strong> Kothi, Rudauli-Ayodhya</p>
+  <p><strong>Call:</strong> <a href="tel:+917307141978" style="color:#fff">+91 7307141978</a> |
+    <strong>Email:</strong> <a href="mailto:amitvishwakarma.ca@gmail.com" style="color:#fff">amitvishwakarma.ca@gmail.com</a></p>
+  <input type="text" id="search" placeholder="Search furniture...">
+</header><main id="product-list"></main><section id="cart-section">
+  <h2>🛒 Cart</h2>
+  <ul id="cart-items"></ul>
+  <p id="total">Total: ₹0</p>
+</section><section id="contact-section">
+  <h2>📞 Contact Us</h2>
+  <form onsubmit="alert('Thanks for your message!'); return false;">
+    <input type="text" placeholder="Your Name" required>
+    <input type="email" placeholder="Your Email" required>
+    <textarea placeholder="Your Message" rows="4" required></textarea>
+    <button class="btn" type="submit">Send Message</button>
+  </form>
+</section><section id="admin-section">
+  <h2>🔐 Admin Panel</h2>
+  <form onsubmit="addProduct(event)">
+    <input type="text" id="admin-name" placeholder="Furniture Name" required>
+    <input type="number" id="admin-price" placeholder="Price in ₹" required>
+    <input type="url" id="admin-image" placeholder="Image URL" required>
+    <button class="btn" type="submit">Add Product</button>
+  </form>
+</section><footer>
+  © 2025 Vishwakarma Furniture | Luxury Home & Office Collections
+</footer><script>
+  let furnitureItems = [
+    { name: "Luxury Sofa Set", price: 45000, image: "https://i.imgur.com/luxsofa.jpg" },
+    { name: "Royal King Bed", price: 85000, image: "https://i.imgur.com/royalbed.jpg" },
+    { name: "Dining Table 6-Seater", price: 32000, image: "https://i.imgur.com/diningtable.jpg" },
+    { name: "Office Executive Chair", price: 8500, image: "https://i.imgur.com/officechair.jpg" },
+    { name: "Classic Wooden Wardrobe", price: 22000, image: "https://i.imgur.com/wardrobe.jpg" },
+    { name: "LED TV Unit", price: 15000, image: "https://i.imgur.com/tvunit.jpg" },
+  ];
+
+  const productList = document.getElementById("product-list");
+  const searchInput = document.getElementById("search");
+  const cartItems = document.getElementById("cart-items");
+  const totalText = document.getElementById("total");
+  let cart = [];
+
+  function renderItems(items) {
+    productList.innerHTML = '';
+    items.forEach((item, index) => {
+      productList.innerHTML += `
+        <div class="card">
+          <img src="${item.image}" alt="${item.name}">
+          <div class="content">
+            <h3>${item.name}</h3>
+            <p><strong>Price:</strong> ₹${item.price}</p>
+            <button class="btn" onclick="addToCart(${index})">Add to Cart</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function addToCart(index) {
+    cart.push(furnitureItems[index]);
+    updateCart();
+  }
+
+  function updateCart() {
+    cartItems.innerHTML = '';
+    let total = 0;
+    cart.forEach(item => {
+      total += item.price;
+      cartItems.innerHTML += `<li>${item.name} - ₹${item.price}</li>`;
+    });
+    totalText.textContent = `Total: ₹${total}`;
+  }
+
+  function addProduct(event) {
+    event.preventDefault();
+    const name = document.getElementById("admin-name").value;
+    const price = parseInt(document.getElementById("admin-price").value);
+    const image = document.getElementById("admin-image").value;
+    furnitureItems.push({ name, price, image });
+    renderItems(furnitureItems);
+    alert("Product added successfully!");
+    event.target.reset();
+  }
+
+  searchInput.addEventListener("input", () => {
+    const keyword = searchInput.value.toLowerCase();
+    const filtered = furnitureItems.filter(item =>
+      item.name.toLowerCase().includes(keyword)
+    );
+    renderItems(filtered);
+  });
+
+  renderItems(furnitureItems);
+</script></body>
+</html>
